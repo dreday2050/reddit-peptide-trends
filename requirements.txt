@@ -1,0 +1,16 @@
+# Reddit Peptide Trend Analyzer - Dependencies
+# =============================================
+# Install with: pip install -r requirements.txt
+
+# Reddit API Wrapper (Official)
+# https://praw.readthedocs.io/
+praw==7.7.1
+
+# Optional: Sentiment Analysis
+# Uncomment to enable sentiment features
+# textblob==0.17.1
+
+# Optional: Data Processing
+# Uncomment if needed for advanced analysis
+# pandas==2.0.3
+# numpy==1.24.3
