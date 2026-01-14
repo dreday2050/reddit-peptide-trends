@@ -187,6 +187,39 @@ def extract_post_data(post: Submission) -> dict:
 
 
 # ============================================================================
+# LOCAL STORAGE (Stub for future implementation)
+# ============================================================================
+
+def save_to_local_storage(post_data: dict, storage_path: str = "data/posts.json") -> None:
+    """
+    Save post data to local storage.
+
+    PRIVACY & COMPLIANCE NOTES:
+    - Data is stored LOCALLY ONLY (never uploaded or shared)
+    - No personal user information is included in post_data
+    - Storage is for personal analysis only
+    - This is a stub - full implementation after API approval
+
+    Args:
+        post_data: Anonymized post data dictionary
+        storage_path: Local file path for storage
+    """
+    # TODO: Implement after API approval
+    # Will use local SQLite or JSON files
+    # Example implementation:
+    #
+    # import json
+    # import os
+    # os.makedirs(os.path.dirname(storage_path), exist_ok=True)
+    # with open(storage_path, 'a') as f:
+    #     json.dump(post_data, f)
+    #     f.write('\n')
+    #
+    # logger.info(f"Saved post {post_data['id']} to local storage")
+    pass
+
+
+# ============================================================================
 # DEMO MODE - Simulates API behavior without credentials
 # ============================================================================
 

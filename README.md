@@ -4,8 +4,30 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Reddit API](https://img.shields.io/badge/Reddit-API%20Compliant-FF4500.svg)](https://www.reddit.com/wiki/api)
 [![Read-Only](https://img.shields.io/badge/Mode-Read--Only-brightgreen.svg)](#compliance)
+[![Demo Mode](https://img.shields.io/badge/Demo-Available-purple.svg)](#quick-demo)
 
 A **personal, non-commercial** Python tool for read-only analysis of public discussion trends in peptide-related subreddits. Built with full compliance to Reddit's [API Terms of Use](https://www.redditinc.com/policies/data-api-terms) and [Responsible Builder Policy](https://support.reddithelp.com/hc/en-us/articles/16160319875092-Reddit-Data-API-Wiki).
+
+---
+
+## Quick Demo
+
+**Try it without any credentials:**
+
+```bash
+git clone https://github.com/dreday2050/reddit-peptide-trends.git
+cd reddit-peptide-trends
+pip install praw
+python main.py --demo
+```
+
+This runs the full code path with simulated data, demonstrating:
+- Rate limiting (2-second delays between requests)
+- Read-only data extraction
+- Privacy-compliant processing (no usernames stored)
+- Proper logging and error handling
+
+Perfect for **reviewers** to verify compliance without needing API access.
 
 ---
 
@@ -114,14 +136,38 @@ This project fetches publicly available posts and comments from peptide-focused 
 ## Usage
 
 ```bash
-# Fetch recent posts from target subreddits
+# Demo mode - no credentials needed (great for testing/review)
+python main.py --demo
+
+# Production mode - fetch real posts (requires config.py with credentials)
 python main.py
 
-# Run with specific subreddit
+# Specify a different subreddit
 python main.py --subreddit Peptides
 
-# Analyze trends (after data collection)
+# View all options
+python main.py --help
+
+# Analyze trends locally (after data collection)
 python analyze.py
+```
+
+### Demo Mode Output
+
+```
+Reddit Peptide Trend Analyzer - DEMO MODE
+Mode: READ-ONLY | Commercial Use: NO
+
+NOTE: Running with simulated data (no API credentials)
+      This demonstrates code structure and data flow.
+
+--- Processing r/Peptides (DEMO) ---
+[Rate limit: waiting 2.0s...]
+Post: BPC-157 healing protocol - 8 week update... | Score: 245 | Comments: 87
+[Rate limit: waiting 2.0s...]
+Post: Comparing TB-500 vs BPC-157 for injury... | Score: 189 | Comments: 62
+...
+DEMO complete. All operations would remain READ-ONLY.
 ```
 
 ---
@@ -154,9 +200,18 @@ See [COMPLIANCE.md](COMPLIANCE.md) for detailed compliance documentation.
 
 ## Project Status
 
-**Current Phase**: Early development / Proof of concept
+**Current Phase**: Functional proof-of-concept / Pending API approval
 
-This repository demonstrates the intended architecture and compliance approach. Full functionality will be developed following API approval.
+| Component | Status |
+|-----------|--------|
+| Core fetcher (`main.py`) | Complete - ready for production |
+| Demo mode | Complete - fully functional |
+| Rate limiting | Implemented (2s delays) |
+| Privacy compliance | Implemented (no PII stored) |
+| Offline analysis (`analyze.py`) | Basic implementation |
+| Local storage | Stub ready for expansion |
+
+This repository contains **working, runnable code** that demonstrates full compliance with Reddit's API policies. Use `python main.py --demo` to verify behavior without credentials.
 
 ---
 
