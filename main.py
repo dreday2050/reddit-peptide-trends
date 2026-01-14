@@ -19,7 +19,8 @@ License: MIT
 
 import time
 import logging
-from datetime import datetime
+import argparse
+from datetime import datetime, timezone
 from typing import Generator, Optional
 
 import praw
@@ -29,16 +30,20 @@ from praw.models import Submission, Comment
 # CONFIGURATION - Import from config.py (see config.example.py for template)
 # ============================================================================
 
+DEMO_MODE = False  # Set by --demo flag
+
 try:
     from config import (
         REDDIT_CLIENT_ID,
         REDDIT_CLIENT_SECRET,
         REDDIT_USER_AGENT,
     )
+    CONFIG_AVAILABLE = True
 except ImportError:
-    print("ERROR: config.py not found. Copy config.example.py to config.py")
-    print("       and fill in your Reddit API credentials.")
-    exit(1)
+    CONFIG_AVAILABLE = False
+    REDDIT_CLIENT_ID = None
+    REDDIT_CLIENT_SECRET = None
+    REDDIT_USER_AGENT = "demo-mode"
 
 # ============================================================================
 # LOGGING SETUP
@@ -170,7 +175,7 @@ def extract_post_data(post: Submission) -> dict:
     """
     return {
         "id": post.id,
-        "created_utc": datetime.utcfromtimestamp(post.created_utc).isoformat(),
+        "created_utc": datetime.fromtimestamp(post.created_utc, tz=timezone.utc).isoformat(),
         "title": post.title,
         "selftext": post.selftext[:500] if post.selftext else "",  # Truncate for efficiency
         "score": post.score,
@@ -179,6 +184,112 @@ def extract_post_data(post: Submission) -> dict:
         "subreddit": str(post.subreddit),
         # NOTE: We do NOT store author/username information
     }
+
+
+# ============================================================================
+# DEMO MODE - Simulates API behavior without credentials
+# ============================================================================
+
+DEMO_POSTS = [
+    {
+        "id": "demo001",
+        "title": "BPC-157 healing protocol - 8 week update with results",
+        "selftext": "Started BPC-157 for tendon issues. Week 8 progress report...",
+        "score": 245,
+        "num_comments": 87,
+        "upvote_ratio": 0.94,
+        "created_utc": datetime.now().timestamp() - 86400,
+    },
+    {
+        "id": "demo002",
+        "title": "Comparing TB-500 vs BPC-157 for injury recovery",
+        "selftext": "Has anyone used both? Looking for experiences...",
+        "score": 189,
+        "num_comments": 62,
+        "upvote_ratio": 0.91,
+        "created_utc": datetime.now().timestamp() - 172800,
+    },
+    {
+        "id": "demo003",
+        "title": "Peptide storage best practices - refrigeration guide",
+        "selftext": "Quick guide on proper peptide storage temperatures...",
+        "score": 312,
+        "num_comments": 45,
+        "upvote_ratio": 0.97,
+        "created_utc": datetime.now().timestamp() - 259200,
+    },
+    {
+        "id": "demo004",
+        "title": "New to peptides - where to start for research?",
+        "selftext": "Looking for beginner-friendly resources and papers...",
+        "score": 156,
+        "num_comments": 93,
+        "upvote_ratio": 0.89,
+        "created_utc": datetime.now().timestamp() - 345600,
+    },
+    {
+        "id": "demo005",
+        "title": "GHK-Cu for skin health - literature review",
+        "selftext": "Compiled research on GHK-Cu mechanisms of action...",
+        "score": 278,
+        "num_comments": 34,
+        "upvote_ratio": 0.96,
+        "created_utc": datetime.now().timestamp() - 432000,
+    },
+]
+
+
+def run_demo_mode():
+    """
+    Run in demo mode without Reddit API credentials.
+
+    Demonstrates the code structure and data flow using simulated data.
+    Useful for reviewers to verify code behavior without live API access.
+    """
+    logger.info("=" * 60)
+    logger.info("Reddit Peptide Trend Analyzer - DEMO MODE")
+    logger.info("Mode: READ-ONLY | Commercial Use: NO")
+    logger.info("=" * 60)
+    logger.info("")
+    logger.info("NOTE: Running with simulated data (no API credentials)")
+    logger.info("      This demonstrates code structure and data flow.")
+    logger.info("")
+
+    subreddit_name = "Peptides"
+    logger.info(f"--- Processing r/{subreddit_name} (DEMO) ---")
+
+    for i, demo_post in enumerate(DEMO_POSTS):
+        # Simulate rate limiting behavior
+        logger.info(f"[Rate limit: waiting {REQUEST_DELAY_SECONDS}s...]")
+        time.sleep(REQUEST_DELAY_SECONDS)
+
+        # Process demo post
+        post_data = {
+            "id": demo_post["id"],
+            "created_utc": datetime.fromtimestamp(demo_post["created_utc"], tz=timezone.utc).isoformat(),
+            "title": demo_post["title"],
+            "selftext": demo_post["selftext"][:500],
+            "score": demo_post["score"],
+            "num_comments": demo_post["num_comments"],
+            "upvote_ratio": demo_post["upvote_ratio"],
+            "subreddit": subreddit_name,
+            # NOTE: No author/username - demonstrating privacy compliance
+        }
+
+        logger.info(
+            f"Post: {post_data['title'][:50]}... | "
+            f"Score: {post_data['score']} | "
+            f"Comments: {post_data['num_comments']}"
+        )
+
+    logger.info("")
+    logger.info(f"Processed {len(DEMO_POSTS)} demo posts from r/{subreddit_name}")
+    logger.info("")
+    logger.info("=" * 60)
+    logger.info("DEMO complete. In production mode with valid credentials,")
+    logger.info("this would fetch REAL public posts via Reddit's API.")
+    logger.info("All operations would remain READ-ONLY.")
+    logger.info("=" * 60)
 
 
 # ============================================================================
@@ -192,7 +303,41 @@ def main():
 
     Demonstrates read-only data fetching from target subreddits.
     All operations are logged for transparency.
+
+    Usage:
+        python main.py           # Normal mode (requires config.py)
+        python main.py --demo    # Demo mode (no credentials needed)
     """
+    parser = argparse.ArgumentParser(
+        description="Reddit Peptide Trend Analyzer - Read-only research tool"
+    )
+    parser.add_argument(
+        "--demo",
+        action="store_true",
+        help="Run in demo mode with simulated data (no API credentials needed)"
+    )
+    parser.add_argument(
+        "--subreddit",
+        type=str,
+        default="Peptides",
+        help="Target subreddit to analyze (default: Peptides)"
+    )
+    args = parser.parse_args()
+
+    # Demo mode - no credentials needed
+    if args.demo:
+        run_demo_mode()
+        return
+
+    # Production mode - requires credentials
+    if not CONFIG_AVAILABLE:
+        print("ERROR: config.py not found. Copy config.example.py to config.py")
+        print("       and fill in your Reddit API credentials.")
+        print("")
+        print("TIP: Run with --demo flag to see the code in action without credentials:")
+        print("     python main.py --demo")
+        exit(1)
+
     logger.info("=" * 60)
     logger.info("Reddit Peptide Trend Analyzer - Starting")
     logger.info("Mode: READ-ONLY | Commercial Use: NO")
